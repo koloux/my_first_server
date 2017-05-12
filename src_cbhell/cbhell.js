@@ -16,11 +16,6 @@ socket.connect(port, "localhost", function () {
 	console.log("Client: Connected to server");
 });
 
-function sort_name(arrWhales) {
-	
-
-}
-
 callback = function(response) {
 	var str = '';
 	response.on('data', function(chunk) {
@@ -32,9 +27,16 @@ callback = function(response) {
 			if (tmp[i] == "id" && tmp[i + 4] == "name" && tmp[i + 8] == "message")
 				arrWhales.push(new Whale(tmp[i + 2], tmp[i + 6], tmp[i + 10]));
 		}
-		for (i = 0; i < arrWhales.length; i++) {
-			console.log(arrWhales[i]);
-		}
+		arrWhales.sort(function(wa, wb) {
+			wa.message = wa.message.toUpperCase();
+			wb.message = wb.message.toUpperCase();
+			if (wa.name < wb.name)
+				return (-1);
+			if (wa.name > wb.name)
+				return (1);
+			return (0);
+		});
+		console.log(arrWhales);
 	});
 }
 
