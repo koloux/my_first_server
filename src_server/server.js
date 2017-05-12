@@ -2,11 +2,7 @@ const http = require('http');
 const url = require('url');
 const port = 3000;
 
-var Whale = function(id, name, message) {
-	this.id = id;
-	this.name = name;
-	this.message = message;
-}
+var Whale = require('./whale.js');
 var arrWhale = [];
 arrWhale.push(new Whale('1', "Seb", "Welcome I am CEO"));
 arrWhale.push(new Whale('2', "Kevin", "I am CTO Bitch!"));
@@ -38,25 +34,32 @@ var server = http.createServer(function(request, response) {
 				i++;
 			}
 		}
-		else
+		else {
 			console.log("Invalid GET");
+			response.end();
+		}
 	}
-	else if (request.method == "POST") {
+	else if (request.method == "POST" && url_trim[1] == "whales" && url_trim.length < 3) {
 		request.on('data', function(data) {
 			body.push(data);
-			if ((body = Buffer.concat(body).toString()).length > 1e6)
+			if (Buffer.concat(body).toString().length > 1e6 || body.length < 1)
 				request.connection.destroy();
 		}).on('end', function() {
-			tmp = body.split('\"');
-			if (tmp[1] == "name" && tmp[5] == "message"){
-				if (tmp[3] != "" && tmp[7] != "") {
-					arrWhale.push(new Whale(arrWhale.length + 1, tmp[3], tmp[7]));
-					console.log(JSON.stringify(arrWhale[arrWhale.length - 1], null, '\t'));
-				}
-				else
-					console.log("Invalid Whale");
+			if ((tmp = Buffer.concat(body).toString().split('\"')).length < 7) {
+				response.end();
+				console.log("Invalid Whale");
 			}
-			response.end(JSON.stringify(arrWhale[arrWhale.length - 1], null, '\t'));
+			else {
+				if (tmp[1] == "name" && tmp[5] == "message"){
+					if (tmp[3] != "" && tmp[7] != "") {
+						i = 1;
+						arrWhale.push(new Whale(arrWhale.length + 1, tmp[3], tmp[7]));
+					}
+					else
+						console.log("Invalid Whale");
+				}
+				(i == 1) ? response.end(JSON.stringify(arrWhale[arrWhale.length - 1], null, '\t')) : response.end();
+			}
 		});
 	}
 	else if (request.method == "DELETE") {
